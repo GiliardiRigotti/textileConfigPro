@@ -2,7 +2,7 @@ import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { ICreateUser, ILoginUser, IUser } from '../interfaces/IUser'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { collection, addDoc, query, getDocs, where } from "firebase/firestore";
+import { collection, addDoc, query, getDocs, where, onSnapshot, doc } from "firebase/firestore";
 import { auth, db } from '../config/firebase';
 import { Alert } from 'react-native';
 
@@ -11,6 +11,7 @@ import { Alert } from 'react-native';
 interface AppContextData {
     userAuth: IUser;
     signed: boolean;
+    listUsers: IUser[];
     createUser: ({ email, password, name, photoUser, role }: ICreateUser) => Promise<void>;
     login: ({ email, password }: ILoginUser) => Promise<void>;
     logout: () => Promise<void>;
@@ -30,7 +31,8 @@ const keysFirebase = {
 }
 
 function AppProvider({ children }: any) {
-    const [userAuth, setUserAuth] = useState<IUser | null>(null)
+    const [userAuth, setUserAuth] = useState<IUser | null>(null);
+    const [listUsers, setListUsers] = useState<IUser[]>([]);
 
     const storeData = async (value: Object, key: string) => {
         try {
@@ -57,6 +59,22 @@ function AppProvider({ children }: any) {
             console.log(e)
         }
     }
+
+    const getListUsers = useCallback(async () => {
+        const userRef = collection(db, keysFirebase.users.nameTable)
+        onSnapshot(userRef, (querySnapshot) => {
+            const data = querySnapshot.docs.map(docs => {
+                console.log(docs.data())
+                return {
+                    name: docs.data().name,
+                    photoUser: docs.data().photoUser,
+                    role: docs.data().role,
+                    uuidLogin: docs.data().uuidLogin,
+                }
+            }) as IUser[]
+            setListUsers(data)
+        })
+    }, [])
 
     const createUser = useCallback(async ({ email, password, name, photoUser, role }: ICreateUser) => {
         createUserWithEmailAndPassword(auth, email, password)
@@ -95,6 +113,9 @@ function AppProvider({ children }: any) {
                             role: doc.data().role,
                             uuidLogin: doc.data().uuidLogin,
                         })
+                        if (doc.data().role == 'coordinator') {
+                            getListUsers()
+                        }
                         await storeData({
                             email,
                             password
@@ -120,12 +141,17 @@ function AppProvider({ children }: any) {
                 const userStorage = await getData(keysStorage.user);
 
                 setUserAuth(userStorage)
+
+                if (!!userStorage) {
+                    await login(userStorage)
+                }
+
             }
         )()
     }, [])
 
     return (
-        <AppContext.Provider value={{ userAuth, signed: !!userAuth?.uuidLogin, createUser, login, logout }}>
+        <AppContext.Provider value={{ userAuth, signed: !!userAuth?.uuidLogin, createUser, login, logout, listUsers }}>
             {children}
         </AppContext.Provider>
     )
