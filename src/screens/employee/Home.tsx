@@ -8,7 +8,7 @@ export function Home() {
             <Header />
             <View style={styles.container}>
                 <Card icon={require("../../assets/costura.png")} title="Gerir Maquinários" color="#de7c7c" styled={true} />
-                <Card icon="account-group" title="Gerir Clientes" color="#fce8b4" styled={false} />
+                <Card icon="qrcode-scan" title="Gerir Clientes" color="#fce8b4" styled={false} />
             </View>
         </>
 

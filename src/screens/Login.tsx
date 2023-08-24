@@ -1,17 +1,31 @@
 import Icon from '@expo/vector-icons/MaterialCommunityIcons'
-import { StyleSheet, TextInput, TouchableOpacity, View, Text } from "react-native";
+import { StyleSheet, TextInput, TouchableOpacity, View, Text, Alert } from "react-native";
 import { Logo } from "../components/Logo";
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { ILoginUser } from '../interfaces/IUser';
+import { AppContext } from '../context';
 
 export function Login() {
     const [hidePassword, setHidePassword] = useState<boolean>(true)
+    const [email, setEmail] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
+    const { login } = useContext(AppContext)
+
+    async function handleLogin() {
+        if (email == '' || password == '') {
+            Alert.alert('Aviso', 'Verifique se seu email/senha esta preenchido');
+            return
+        }
+        await login({ email, password });
+
+    }
     return (
         <View style={styles.container}>
             <Logo />
             <View style={styles.form}>
                 <View style={styles.input}>
                     <Icon name='account-circle' size={33} />
-                    <TextInput style={{ width: '83%', fontSize: 20 }} />
+                    <TextInput style={{ width: '83%', fontSize: 20 }} onChangeText={setEmail} />
                 </View>
                 <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 10, alignSelf: 'flex-start' }}>
                     <View style={{ width: 13, height: 13, borderRadius: 10, backgroundColor: '#d9d9d9', marginRight: 10 }} />
@@ -22,7 +36,7 @@ export function Login() {
                         <Icon name='lock' size={23} color={'#d9d9d9'} />
                     </View>
 
-                    <TextInput style={{ width: '70%', fontSize: 20 }} secureTextEntry={hidePassword} />
+                    <TextInput style={{ width: '70%', fontSize: 20 }} secureTextEntry={hidePassword} onChangeText={setPassword} />
                     <TouchableOpacity onPress={() => setHidePassword(!hidePassword)}>
                         {
                             hidePassword ?
@@ -37,7 +51,7 @@ export function Login() {
                 <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 10, alignSelf: 'flex-start' }}>
                     <Text>RECUPERAR SENHA</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity style={styles.button} onPress={handleLogin}>
                     <Text style={{ fontSize: 15, fontWeight: 'bold' }}>ENTRAR</Text>
                 </TouchableOpacity>
             </View>

@@ -1,16 +1,23 @@
 import AuthRoutes from "./auth.routes";
-import { NavigationContainer } from '@react-navigation/native';
-import { NotifierWrapper } from 'react-native-notifier';
-import { AppProvider } from "../context";
 import AdminRoutes from "./admin.routes";
 import AppRoutes from "./app.routes";
+import { useContext } from "react";
+import { AppContext } from "../context";
 
 export function Routes() {
+    const { userAuth } = useContext(AppContext)
+    console.log('User Auth', userAuth)
     return (
-        <NavigationContainer>
-            <AppProvider>
-                <AppRoutes />
-            </AppProvider>
-        </NavigationContainer>
+        <>
+            {
+                !userAuth ?
+                    <AuthRoutes />
+                    :
+                    userAuth.role == 'coordinator' ?
+                        <AdminRoutes />
+                        :
+                        <AppRoutes />
+            }
+        </>
     )
 }

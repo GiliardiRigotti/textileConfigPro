@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         width: '90%',
-        height: 150,
+        height: '20%',
         borderRadius: 20,
         marginTop: 20,
     }
