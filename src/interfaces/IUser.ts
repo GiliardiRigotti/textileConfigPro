@@ -12,7 +12,7 @@ interface ILoginUser {
 }
 
 interface ICreateUser extends IUser, ILoginUser {
-
+    image: string;
 }
 
 export { ILoginUser, IUser, ICreateUser }

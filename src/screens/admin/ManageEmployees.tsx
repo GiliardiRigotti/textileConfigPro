@@ -4,8 +4,9 @@ import { Header } from "../../components/Header"
 import { useContext, useState } from "react"
 import { AppContext } from "../../context"
 import { IUser } from "../../interfaces/IUser"
-import { Input } from "../../components/input"
 import { Select } from "../../components/Select"
+import { Input } from "../../components/Input"
+import { AttachmentGallery } from "../../components/AttachmentGallery"
 
 export function ManageEmployees() {
     const { listUsers } = useContext(AppContext);
@@ -84,6 +85,7 @@ export function ManageEmployees() {
                             },]}
                                 onChange={(value) => setEdit({ ...edit, role: value })}
                             />
+                            <AttachmentGallery onChange={(value) => setEdit({ ...edit, photoUser: value })} />
                         </View>
                     </View>
                 </Modal>

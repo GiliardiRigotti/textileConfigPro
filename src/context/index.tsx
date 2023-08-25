@@ -1,11 +1,12 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import { ICreateUser, ILoginUser, IUser } from '../interfaces/IUser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ref, uploadBytes } from "firebase/storage";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { collection, addDoc, query, getDocs, where, onSnapshot, doc } from "firebase/firestore";
-import { auth, db } from '../config/firebase';
-import { Alert } from 'react-native';
-
+import { collection, addDoc, query, getDocs, where, onSnapshot } from "firebase/firestore";
+import { auth, db, storage } from '../config/firebase';
+import { Alert, ImageProps } from 'react-native';
+import { ImagePickerResult } from 'expo-image-picker';
 
 
 interface AppContextData {
@@ -33,6 +34,16 @@ const keysFirebase = {
 function AppProvider({ children }: any) {
     const [userAuth, setUserAuth] = useState<IUser | null>(null);
     const [listUsers, setListUsers] = useState<IUser[]>([]);
+
+    const storageUploadPhotoUser = useCallback(async (uuidLogin: string, image: string) => {
+        const response = await fetch(image)
+        const blob = await response.blob()
+        const filename = image.substring(image.lastIndexOf('/') + 1)
+        const storageRef = ref(storage, 'photoUser' + filename);
+        uploadBytes(storageRef, blob).then((snapshot) => {
+            console.log('Uploaded a blob or file!: ', snapshot);
+        });
+    }, [])
 
     const storeData = async (value: Object, key: string) => {
         try {
@@ -76,9 +87,11 @@ function AppProvider({ children }: any) {
         })
     }, [])
 
-    const createUser = useCallback(async ({ email, password, name, photoUser, role }: ICreateUser) => {
+    const createUser = useCallback(async ({ email, password, name, photoUser, role, image }: ICreateUser) => {
+        storageUploadPhotoUser
         createUserWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
+                storageUploadPhotoUser(userCredential.user.uid, image)
                 addDoc(collection(db, keysFirebase.users.nameTable), {
                     name,
                     role,
@@ -90,6 +103,7 @@ function AppProvider({ children }: any) {
                     .catch((error) => {
                         Alert.alert("Error adding document: ", error);
                     });
+
             })
             .catch((error) => {
                 Alert.alert(`Error ${error.code}`, error.message);
