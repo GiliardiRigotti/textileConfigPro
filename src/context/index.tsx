@@ -1,5 +1,5 @@
-import React, { createContext, useCallback, useEffect, useState } from 'react'
-import { ICreateUser, ILoginUser, IUser } from '../interfaces/IUser'
+import React, { createContext, useCallback, useEffect, useState } from 'react';
+import { ICreateUser, ILoginUser, IUser } from '../interfaces/IUser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { collection, addDoc, query, getDocs, where, onSnapshot, doc } from "firebase/firestore";
@@ -90,7 +90,6 @@ function AppProvider({ children }: any) {
                     .catch((error) => {
                         Alert.alert("Error adding document: ", error);
                     });
-
             })
             .catch((error) => {
                 Alert.alert(`Error ${error.code}`, error.message);
@@ -139,8 +138,6 @@ function AppProvider({ children }: any) {
         (
             async () => {
                 const userStorage = await getData(keysStorage.user);
-
-                setUserAuth(userStorage)
 
                 if (!!userStorage) {
                     await login(userStorage)
