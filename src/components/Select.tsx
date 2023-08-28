@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Modal, TextInput } from "react-native";
 
 interface Item {
@@ -8,11 +8,11 @@ interface Item {
 }
 interface Props {
     title: string;
-    onChange: () => string;
+    onSelected: React.Dispatch<React.SetStateAction<string>>;
     items: Item[];
 }
 
-export function Select({ title, items, onChange }: Props) {
+export function Select({ title, items, onSelected }: Props) {
     const [modal, setModal] = useState<boolean>(false)
     const [selected, setSelected] = useState<Item>()
 
@@ -21,13 +21,19 @@ export function Select({ title, items, onChange }: Props) {
         setModal(false)
     }
 
+    useEffect(() => {
+        if (selected) {
+            onSelected(selected.value)
+        }
+    }, [selected])
+
     return (
         <View style={styles.container}>
             <Text style={styles.title}>{title}</Text>
             <TouchableOpacity style={styles.input} onPress={() => setModal(true)}>
                 {
                     !!selected ?
-                        <TextInput value={selected.name} editable={false} onChangeText={onChange} style={{ color: '#000' }} />
+                        <Text>{selected.name}</Text>
                         :
                         <Text>Selecione</Text>
                 }

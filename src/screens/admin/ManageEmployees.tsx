@@ -7,6 +7,8 @@ import { IUser } from "../../interfaces/IUser"
 import { Select } from "../../components/Select"
 import { Input } from "../../components/Input"
 import { AttachmentGallery } from "../../components/AttachmentGallery"
+import { AttachImage } from "../../components/AttachImage"
+import { ImagePickerResult } from "expo-image-picker"
 
 export function ManageEmployees() {
     const { listUsers } = useContext(AppContext);
@@ -83,9 +85,9 @@ export function ManageEmployees() {
                                 value: 'admin',
                                 name: 'administrador'
                             },]}
-                                onChange={(value) => setEdit({ ...edit, role: value })}
+                                onSelected={(value) => setEdit({ ...edit, role: value })}
                             />
-                            <AttachmentGallery onChange={(value) => setEdit({ ...edit, photoUser: value })} />
+                            <AttachImage onGetImage={(value: ImagePickerResult) => setEdit({ ...edit, photoUser: value.assets[0].uri })} />
                         </View>
                     </View>
                 </Modal>
