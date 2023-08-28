@@ -1,4 +1,4 @@
-import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { Alert, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import Icon from '@expo/vector-icons/MaterialCommunityIcons'
 import { Header } from "../../components/Header"
 import { useContext, useState } from "react"
@@ -6,18 +6,29 @@ import { AppContext } from "../../context"
 import { IUser } from "../../interfaces/IUser"
 import { Select } from "../../components/Select"
 import { Input } from "../../components/Input"
-import { AttachmentGallery } from "../../components/AttachmentGallery"
 import { AttachImage } from "../../components/AttachImage"
-import { ImagePickerResult } from "expo-image-picker"
 
 export function ManageEmployees() {
-    const { listUsers } = useContext(AppContext);
+    const { listUsers, createUser } = useContext(AppContext);
     const [modal, setModal] = useState<boolean>(false);
     const [edit, setEdit] = useState<IUser>();
+    const [load, setLoad] = useState<boolean>(false)
 
     function handleEdit(index: number) {
         setModal(true);
         setEdit(listUsers[index]);
+    }
+
+    async function handleSend() {
+        setLoad(true)
+        try {
+            if (!edit) {
+                throw new Error('Esta vazio a edição')
+            }
+            //await createUser(edit)
+        } catch (error) {
+            Alert.alert('Error:', error)
+        }
     }
 
     return (
@@ -87,7 +98,10 @@ export function ManageEmployees() {
                             },]}
                                 onSelected={(value) => setEdit({ ...edit, role: value })}
                             />
-                            <AttachImage onGetImage={(value: ImagePickerResult) => setEdit({ ...edit, photoUser: value.assets[0].uri })} />
+                            <AttachImage onGetImage={(value) => setEdit({ ...edit, photoUser: value.assets[0].uri })} />
+                            <TouchableOpacity onPress={() => { }} style={[styles.button, { backgroundColor: '#84ff68' }]}>
+                                <Text style={styles.buttonTitle}>Enviar</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </Modal>
@@ -145,5 +159,18 @@ const styles = StyleSheet.create({
         shadowRadius: 3.84,
 
         elevation: 5,
+    },
+    button: {
+        alignSelf: 'center',
+        width: '45%',
+        height: 50,
+        borderRadius: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 20,
+    },
+    buttonTitle: {
+        color: '#fff',
+        fontWeight: 'bold',
     }
 })
