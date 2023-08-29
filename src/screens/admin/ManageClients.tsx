@@ -93,7 +93,7 @@ export function ManageClients() {
                                 )
                             })
                             :
-                            <Text>Sem clientes cadastrados</Text>
+                            <Text style={{ alignSelf: "center" }}>Sem clientes cadastrados</Text>
                     }
                 </ScrollView >
                 <Modal
@@ -108,7 +108,7 @@ export function ManageClients() {
                             <Text style={{ alignSelf: 'center', fontSize: 18, fontWeight: 'bold' }}>Cadastro de Cliente</Text>
                             <Input title="Nome" onChangeText={(value) => setNewUser({ ...newUser, name: value })} />
                             <Input title="E-mail" onChangeText={(value) => setNewUser({ ...newUser, email: value })} />
-                            <Input title="Telefone" onChangeText={(value) => setNewUser({ ...newUser, phone: value })} />
+                            <Input title="Telefone" maxLength={11} onChangeText={(value) => setNewUser({ ...newUser, phone: value })} />
                             <TouchableOpacity onPress={handleSend} style={[styles.button, { backgroundColor: '#84ff68' }]} disabled={load}>
                                 <Text style={styles.buttonTitle}>Enviar</Text>
                             </TouchableOpacity>
