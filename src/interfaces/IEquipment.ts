@@ -1,0 +1,3 @@
+interface IEquipment {
+    name: string;
+}

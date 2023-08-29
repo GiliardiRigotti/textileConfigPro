@@ -3,31 +3,57 @@ import Icon from '@expo/vector-icons/MaterialCommunityIcons'
 import { Header } from "../../components/Header"
 import { useContext, useState } from "react"
 import { AppContext } from "../../context"
-import { IUser } from "../../interfaces/IUser"
+import { ICreateUser, IUser } from "../../interfaces/IUser"
 import { Select } from "../../components/Select"
 import { Input } from "../../components/Input"
 import { AttachImage } from "../../components/AttachImage"
+import { useNavigation } from "@react-navigation/native"
 
 export function ManageEmployees() {
-    const { listUsers, createUser } = useContext(AppContext);
-    const [modal, setModal] = useState<boolean>(false);
+    const { listUsers, createUser, deleteUser } = useContext(AppContext);
+    const [modalCreate, setModalCreate] = useState<boolean>(false);
+    const [modalEdit, setModalEdit] = useState<boolean>(false);
     const [edit, setEdit] = useState<IUser>();
+    const [newUser, setNewUser] = useState<ICreateUser>()
     const [load, setLoad] = useState<boolean>(false)
 
-    function handleEdit(index: number) {
-        setModal(true);
-        setEdit(listUsers[index]);
+    function handleDelete(id: string) {
+
+        Alert.alert(
+            'Aviso',
+            'Tem certeza que quer deletar?',
+            [
+                {
+                    text: 'Não',
+                    onPress: () => { },
+                    style: 'cancel',
+                },
+                {
+                    text: 'Sim',
+                    onPress: async () => await deleteUser(id),
+                },
+            ],
+            { cancelable: false },
+        );
+    }
+
+    function handleAddUser() {
+        setModalCreate(true);
     }
 
     async function handleSend() {
         setLoad(true)
         try {
-            if (!edit) {
+            if (!newUser) {
                 throw new Error('Esta vazio a edição')
             }
-            //await createUser(edit)
+            await createUser(newUser)
+            Alert.alert('Criado usuario com sucesso!')
+            setModalCreate(false)
         } catch (error) {
             Alert.alert('Error:', error)
+        } finally {
+            setLoad(false)
         }
     }
 
@@ -62,8 +88,8 @@ export function ManageEmployees() {
                                         <View style={styles.column}>
                                             <Text style={styles.rowText}>{user.name}</Text>
                                         </View>
-                                        <TouchableOpacity style={styles.column} onPress={() => handleEdit(index)}>
-                                            <Icon name="pencil" size={25} />
+                                        <TouchableOpacity style={styles.column} onPress={() => handleDelete(user.id)}>
+                                            <Icon name="delete" size={25} />
                                         </TouchableOpacity>
                                     </View>
                                 )
@@ -73,16 +99,18 @@ export function ManageEmployees() {
                     }
                 </ScrollView >
                 <Modal
-                    visible={modal}
+                    visible={modalCreate}
                     transparent
                 >
                     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
                         <View style={[styles.list, { height: '80%', width: '90%' }, styles.shadow]}>
-                            <TouchableOpacity onPress={() => setModal(false)}>
+                            <TouchableOpacity onPress={() => setModalCreate(false)}>
                                 <Icon name="close" size={20} />
                             </TouchableOpacity>
                             <Text style={{ alignSelf: 'center', fontSize: 18, fontWeight: 'bold' }}>Cadastro de Cliente</Text>
-                            <Input title="Nome" value={edit?.name} onChangeText={(value) => setEdit({ ...edit, name: value })} />
+                            <Input title="Nome" onChangeText={(value) => setNewUser({ ...newUser, name: value })} />
+                            <Input title="E-mail" onChangeText={(value) => setNewUser({ ...newUser, email: value })} />
+                            <Input title="Password" secureTextEntry onChangeText={(value) => setNewUser({ ...newUser, password: value })} />
                             <Select title="Cargo" items={[{
                                 index: 0,
                                 value: 'coordinator',
@@ -96,16 +124,16 @@ export function ManageEmployees() {
                                 value: 'admin',
                                 name: 'administrador'
                             },]}
-                                onSelected={(value) => setEdit({ ...edit, role: value })}
+                                onSelected={(value) => setNewUser({ ...newUser, role: value })}
                             />
-                            <AttachImage onGetImage={(value) => setEdit({ ...edit, photoUser: value.assets[0].uri })} />
-                            <TouchableOpacity onPress={() => { }} style={[styles.button, { backgroundColor: '#84ff68' }]}>
+                            <AttachImage onGetImage={(value) => setNewUser({ ...newUser, photoUser: value.assets[0].uri })} />
+                            <TouchableOpacity onPress={handleSend} style={[styles.button, { backgroundColor: '#84ff68' }]} disabled={load}>
                                 <Text style={styles.buttonTitle}>Enviar</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
                 </Modal>
-                <TouchableOpacity style={{ position: 'absolute', right: 40, bottom: 20, backgroundColor: '#d9d9d9', width: 60, height: 60, borderRadius: 40, alignItems: 'center', justifyContent: 'center' }}>
+                <TouchableOpacity onPress={handleAddUser} style={{ position: 'absolute', right: 40, bottom: 20, backgroundColor: '#d9d9d9', width: 60, height: 60, borderRadius: 40, alignItems: 'center', justifyContent: 'center' }}>
                     <Text style={{ fontSize: 40, color: 'white' }}>+</Text>
                 </TouchableOpacity>
             </View >

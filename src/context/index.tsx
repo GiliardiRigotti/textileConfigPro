@@ -1,21 +1,28 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import { ICreateUser, ILoginUser, IUser } from '../interfaces/IUser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ref, uploadBytes } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { collection, addDoc, query, getDocs, where, onSnapshot } from "firebase/firestore";
+import { collection, addDoc, query, getDocs, where, onSnapshot, deleteDoc, doc } from "firebase/firestore";
 import { auth, db, storage } from '../config/firebase';
-import { Alert, ImageProps } from 'react-native';
-import { ImagePickerResult } from 'expo-image-picker';
+import { Alert } from 'react-native';
+import { IClient } from '../interfaces/IClient';
 
 
 interface AppContextData {
-    userAuth: IUser;
+    userAuth: IUser | null;
     signed: boolean;
     listUsers: IUser[];
+    listClients: IClient[];
+    listEquipments: IEquipment[];
     createUser: ({ email, password, name, photoUser, role }: ICreateUser) => Promise<void>;
+    createClient: ({ email, name, phone }: IClient) => Promise<void>;
+    createEquipment: ({ name }: IEquipment) => Promise<void>;
     login: ({ email, password }: ILoginUser) => Promise<void>;
     logout: () => Promise<void>;
+    deleteUser: (id: string) => Promise<boolean>;
+    deleteClient: (id: string) => Promise<boolean>;
+    deleteEquipment: (id: string) => Promise<boolean>;
 }
 
 const AppContext = createContext({} as AppContextData)
@@ -29,20 +36,57 @@ const keysFirebase = {
         nameTable: 'users',
         uuidLogin: 'uuidLogin',
     },
+    clients: {
+        nameTable: 'clients',
+    },
 }
 
 function AppProvider({ children }: any) {
     const [userAuth, setUserAuth] = useState<IUser | null>(null);
     const [listUsers, setListUsers] = useState<IUser[]>([]);
+    const [listClients, setListClients] = useState<IClient[]>([]);
 
-    const storageUploadPhotoUser = useCallback(async (uuidLogin: string, image: string) => {
-        const response = await fetch(image)
-        const blob = await response.blob()
-        const filename = image.substring(image.lastIndexOf('/') + 1)
-        const storageRef = ref(storage, 'photoUser' + filename);
-        uploadBytes(storageRef, blob).then((snapshot) => {
-            console.log('Uploaded a blob or file!: ', snapshot);
+    function uriToBlob(uri: string): Promise<Blob> {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+
+            // If successful -> return with blob
+            xhr.onload = function () {
+                resolve(xhr.response);
+            };
+
+            // reject on error
+            xhr.onerror = function () {
+                reject(new Error('uriToBlob failed'));
+            };
+
+            // Set the response type to 'blob' - this means the server's response 
+            // will be accessed as a binary object
+            xhr.responseType = 'blob';
+
+            // Initialize the request. The third argument set to 'true' denotes 
+            // that the request is asynchronous
+            xhr.open('GET', uri, true);
+
+            // Send the request. The 'null' argument means that no body content is given for the request
+            xhr.send(null);
         });
+    };
+
+    const storageUploadPhotoUser = useCallback(async (uuidLogin: string, imageUri: string) => {
+        try {
+            const storageRef = ref(storage, `${uuidLogin}.jpeg`);
+            const blob = await uriToBlob(imageUri)
+            const result = await uploadBytes(storageRef, blob)
+            const linkImage = await getDownloadURL(result.ref)
+            console.log('linkImage: ', linkImage)
+            return linkImage
+        } catch (error: any) {
+            console.error(error)
+            Alert.alert('Error:', error)
+            return null
+        }
+
     }, [])
 
     const storeData = async (value: Object, key: string) => {
@@ -77,6 +121,7 @@ function AppProvider({ children }: any) {
             const data = querySnapshot.docs.map(docs => {
                 console.log(docs.data())
                 return {
+                    id: docs.id,
                     name: docs.data().name,
                     photoUser: docs.data().photoUser,
                     role: docs.data().role,
@@ -87,17 +132,17 @@ function AppProvider({ children }: any) {
         })
     }, [])
 
-    const createUser = useCallback(async ({ email, password, name, photoUser, role, image }: ICreateUser) => {
-        storageUploadPhotoUser
+    const createUser = useCallback(async ({ email, password, name, photoUser, role }: ICreateUser) => {
         createUserWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                storageUploadPhotoUser(userCredential.user.uid, image)
+            .then(async (userCredential) => {
+                const uri = await storageUploadPhotoUser(userCredential.user.uid, photoUser)
                 addDoc(collection(db, keysFirebase.users.nameTable), {
                     name,
                     role,
-                    photoUser,
+                    photoUse: uri,
                     uuidLogin: userCredential.user.uid
                 }).then((docRef) => {
+                    console.log('New User', docRef.id)
                     return docRef.id
                 })
                     .catch((error) => {
@@ -108,6 +153,61 @@ function AppProvider({ children }: any) {
             .catch((error) => {
                 Alert.alert(`Error ${error.code}`, error.message);
             });
+    }, [])
+
+    const deleteUser = useCallback(async (id: string) => {
+        try {
+            await deleteDoc(doc(db, keysFirebase.users.nameTable, id));
+            Alert.alert('Funcionario excluido com sucesso!')
+            return true
+        } catch (error: any) {
+            Alert.alert('Error', error)
+            return false
+        }
+    }, [])
+
+    const getListClients = useCallback(async () => {
+        const userRef = collection(db, keysFirebase.clients.nameTable)
+        onSnapshot(userRef, (querySnapshot) => {
+            const data = querySnapshot.docs.map(docs => {
+                console.log(docs.data())
+                return {
+                    id: docs.id,
+                    name: docs.data().name,
+                    phone: docs.data().phone,
+                }
+            }) as IClient[]
+            setListClients(data)
+        })
+    }, [])
+
+
+    const createClient = useCallback(async ({ email, name, phone }: IClient) => {
+
+        addDoc(collection(db, keysFirebase.clients.nameTable), {
+            name,
+            email,
+            phone
+        }).then((docRef) => {
+            console.log('New Client', docRef.id)
+            return docRef.id
+        })
+            .catch((error) => {
+                Alert.alert("Error adding document: ", error);
+            });
+
+
+    }, [])
+
+    const deleteClient = useCallback(async (id: string) => {
+        try {
+            await deleteDoc(doc(db, keysFirebase.clients.nameTable, id));
+            Alert.alert('Cliente excluido com sucesso!')
+            return true
+        } catch (error: any) {
+            Alert.alert('Error', error)
+            return false
+        }
     }, [])
 
     const login = useCallback(async ({ email, password }: ILoginUser) => {
@@ -127,7 +227,8 @@ function AppProvider({ children }: any) {
                             uuidLogin: doc.data().uuidLogin,
                         })
                         if (doc.data().role == 'coordinator') {
-                            getListUsers()
+                            getListUsers();
+                            getListClients();
                         }
                         await storeData({
                             email,
@@ -162,7 +263,7 @@ function AppProvider({ children }: any) {
     }, [])
 
     return (
-        <AppContext.Provider value={{ userAuth, signed: !!userAuth?.uuidLogin, createUser, login, logout, listUsers }}>
+        <AppContext.Provider value={{ userAuth, signed: !!userAuth?.uuidLogin, createUser, login, logout, listUsers, deleteUser, createClient, listClients, deleteClient }}>
             {children}
         </AppContext.Provider>
     )

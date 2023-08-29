@@ -50,7 +50,7 @@ export function AttachImage({
             </TouchableOpacity>
             {
                 image?.assets[0] &&
-                <Image source={{ uri: image.assets[0].uri }} style={{ width: 200, height: 200, resizeMode: 'contain', borderRadius: 100 }} />
+                <Image source={{ uri: image.assets[0].uri }} style={{ width: 100, height: 100, resizeMode: 'contain', borderRadius: 100 }} />
             }
         </View>
     )

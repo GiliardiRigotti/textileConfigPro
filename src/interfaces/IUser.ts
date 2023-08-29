@@ -1,4 +1,5 @@
 interface IUser {
+    id?: string;
     name: string;
     photoUser: string;
     role: 'coordinator' | 'employeer' | 'manager';
@@ -12,7 +13,6 @@ interface ILoginUser {
 }
 
 interface ICreateUser extends IUser, ILoginUser {
-    image: string;
 }
 
 export { ILoginUser, IUser, ICreateUser }
