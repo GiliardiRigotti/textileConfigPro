@@ -3,7 +3,7 @@ import { View, Image, TouchableOpacity, Text, TextInput, Alert, StyleSheet } fro
 import * as ImagePicker from 'expo-image-picker';
 
 interface Props {
-    onGetImage: React.Dispatch<React.SetStateAction<ImagePicker.ImagePickerResult>>;
+    onGetImage: React.Dispatch<React.SetStateAction<string>>;
 
 }
 
@@ -32,8 +32,8 @@ export function AttachImage({
     };
 
     useEffect(() => {
-        if (image) {
-            onGetImage(image);
+        if (image?.assets) {
+            onGetImage(image.assets[0].uri);
         }
     }, [image]);
 
@@ -49,7 +49,7 @@ export function AttachImage({
 
             </TouchableOpacity>
             {
-                image?.assets[0] &&
+                image?.assets &&
                 <Image source={{ uri: image.assets[0].uri }} style={{ width: 100, height: 100, resizeMode: 'contain', borderRadius: 100 }} />
             }
         </View>

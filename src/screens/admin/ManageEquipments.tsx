@@ -3,15 +3,12 @@ import Icon from '@expo/vector-icons/MaterialCommunityIcons'
 import { Header } from "../../components/Header"
 import { useContext, useState } from "react"
 import { AppContext } from "../../context"
-import { ICreateUser, IUser } from "../../interfaces/IUser"
-import { Select } from "../../components/Select"
 import { Input } from "../../components/Input"
-import { AttachImage } from "../../components/AttachImage"
 
-export function ManageEmployees() {
-    const { listUsers, createUser, deleteUser } = useContext(AppContext);
+export function ManageEquipments() {
+    const { listEquipments, createEquipment, deleteEquipment } = useContext(AppContext);
     const [modalCreate, setModalCreate] = useState<boolean>(false);
-    const [newUser, setNewUser] = useState<ICreateUser>()
+    const [newUser, setNewUser] = useState<IEquipment>()
     const [load, setLoad] = useState<boolean>(false)
 
     function handleDelete(id: string) {
@@ -27,7 +24,7 @@ export function ManageEmployees() {
                 },
                 {
                     text: 'Sim',
-                    onPress: async () => await deleteUser(id),
+                    onPress: async () => await deleteEquipment(id),
                 },
             ],
             { cancelable: false },
@@ -44,7 +41,7 @@ export function ManageEmployees() {
             if (!newUser) {
                 throw new Error('Esta vazio a edição')
             }
-            await createUser(newUser)
+            await createEquipment(newUser)
             Alert.alert('Criado usuario com sucesso!')
             setModalCreate(false)
         } catch (error: any) {
@@ -67,18 +64,18 @@ export function ManageEmployees() {
                             <Text style={styles.rowTitle}>ID</Text>
                         </View>
                         <View style={styles.column}>
-                            <Text style={styles.rowTitle}>Funcionário</Text>
+                            <Text style={styles.rowTitle}>Maquina</Text>
                         </View>
                         <View style={styles.column}>
-                            <Text style={styles.rowTitle}>Configuração</Text>
+                            <Text style={styles.rowTitle}>Ação</Text>
                         </View>
                     </View>
                     {
-                        listUsers.length > 0 ?
-                            listUsers.map((user, index) => {
+                        listEquipments.length > 0 ?
+                            listEquipments.map((user, index) => {
                                 console.log(index)
                                 return (
-                                    <View key={user.uuidLogin} style={styles.row}>
+                                    <View key={user.id} style={styles.row}>
                                         <View style={styles.columnId}>
                                             <Text style={styles.rowText}>{index}</Text>
                                         </View>
@@ -92,7 +89,7 @@ export function ManageEmployees() {
                                 )
                             })
                             :
-                            <Text>Sem funcionarios cadastrados</Text>
+                            <Text style={{ alignSelf: "center" }}>Sem maquina cadastrada</Text>
                     }
                 </ScrollView >
                 <Modal
@@ -105,25 +102,7 @@ export function ManageEmployees() {
                                 <Icon name="close" size={20} />
                             </TouchableOpacity>
                             <Text style={{ alignSelf: 'center', fontSize: 18, fontWeight: 'bold' }}>Cadastro de Cliente</Text>
-                            <Input title="Nome" onChangeText={(value) => setNewUser({ ...newUser, name: value })} />
-                            <Input title="E-mail" onChangeText={(value) => setNewUser({ ...newUser, email: value })} />
-                            <Input title="Password" secureTextEntry onChangeText={(value) => setNewUser({ ...newUser, password: value })} />
-                            <Select title="Cargo" items={[{
-                                index: 0,
-                                value: 'coordinator',
-                                name: 'coordenador'
-                            }, {
-                                index: 1,
-                                value: 'employee',
-                                name: 'empregado'
-                            }, {
-                                index: 2,
-                                value: 'admin',
-                                name: 'administrador'
-                            },]}
-                                onSelected={(value) => setNewUser({ ...newUser, role: value })}
-                            />
-                            <AttachImage onGetImage={(value) => setNewUser({ ...newUser, photoUser: value })} />
+                            <Input title="Nome" onChangeText={(value) => setNewUser({ name: value })} />
                             <TouchableOpacity onPress={handleSend} style={[styles.button, { backgroundColor: '#84ff68' }]} disabled={load}>
                                 <Text style={styles.buttonTitle}>Enviar</Text>
                             </TouchableOpacity>

@@ -39,36 +39,33 @@ const keysFirebase = {
     clients: {
         nameTable: 'clients',
     },
+    equipments: {
+        nameTable: 'equipments',
+    },
 }
 
 function AppProvider({ children }: any) {
     const [userAuth, setUserAuth] = useState<IUser | null>(null);
     const [listUsers, setListUsers] = useState<IUser[]>([]);
     const [listClients, setListClients] = useState<IClient[]>([]);
+    const [listEquipments, setListEquipments] = useState<IEquipment[]>([]);
 
     function uriToBlob(uri: string): Promise<Blob> {
         return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
 
-            // If successful -> return with blob
             xhr.onload = function () {
                 resolve(xhr.response);
             };
 
-            // reject on error
             xhr.onerror = function () {
                 reject(new Error('uriToBlob failed'));
             };
 
-            // Set the response type to 'blob' - this means the server's response 
-            // will be accessed as a binary object
             xhr.responseType = 'blob';
 
-            // Initialize the request. The third argument set to 'true' denotes 
-            // that the request is asynchronous
             xhr.open('GET', uri, true);
 
-            // Send the request. The 'null' argument means that no body content is given for the request
             xhr.send(null);
         });
     };
@@ -210,6 +207,47 @@ function AppProvider({ children }: any) {
         }
     }, [])
 
+    const getListEquipments = useCallback(async () => {
+        const userRef = collection(db, keysFirebase.equipments.nameTable)
+        onSnapshot(userRef, (querySnapshot) => {
+            const data = querySnapshot.docs.map(docs => {
+                console.log(docs.data())
+                return {
+                    id: docs.id,
+                    name: docs.data().name,
+                }
+            }) as IEquipment[]
+            setListEquipments(data)
+        })
+    }, [])
+
+
+    const createEquipment = useCallback(async ({ name }: IEquipment) => {
+
+        addDoc(collection(db, keysFirebase.equipments.nameTable), {
+            name,
+        }).then((docRef) => {
+            console.log('New Equipament', docRef.id)
+            return docRef.id
+        })
+            .catch((error) => {
+                Alert.alert("Error adding document: ", error);
+            });
+
+
+    }, [])
+
+    const deleteEquipment = useCallback(async (id: string) => {
+        try {
+            await deleteDoc(doc(db, keysFirebase.equipments.nameTable, id));
+            Alert.alert('Cliente excluido com sucesso!')
+            return true
+        } catch (error: any) {
+            Alert.alert('Error', error)
+            return false
+        }
+    }, [])
+
     const login = useCallback(async ({ email, password }: ILoginUser) => {
         signInWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
@@ -229,6 +267,7 @@ function AppProvider({ children }: any) {
                         if (doc.data().role == 'coordinator') {
                             getListUsers();
                             getListClients();
+                            getListEquipments();
                         }
                         await storeData({
                             email,
@@ -263,7 +302,7 @@ function AppProvider({ children }: any) {
     }, [])
 
     return (
-        <AppContext.Provider value={{ userAuth, signed: !!userAuth?.uuidLogin, createUser, login, logout, listUsers, deleteUser, createClient, listClients, deleteClient }}>
+        <AppContext.Provider value={{ userAuth, signed: !!userAuth?.uuidLogin, createUser, login, logout, listUsers, deleteUser, createClient, listClients, deleteClient, listEquipments, createEquipment, deleteEquipment }}>
             {children}
         </AppContext.Provider>
     )
