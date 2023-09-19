@@ -5,4 +5,10 @@ interface IClient {
     email: string;
 }
 
-export { IClient }
+interface IDesignation {
+    id?: string;
+    equipamentId: string;
+    userId: string;
+}
+
+export { IClient, IDesignation }

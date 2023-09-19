@@ -6,6 +6,7 @@ import { AppContext } from "../context";
 
 export function Routes() {
     const { userAuth } = useContext(AppContext)
+    console.log(userAuth)
     return (
         <>
             {

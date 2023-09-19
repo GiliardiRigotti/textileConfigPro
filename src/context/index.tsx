@@ -6,7 +6,7 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "fire
 import { collection, addDoc, query, getDocs, where, onSnapshot, deleteDoc, doc } from "firebase/firestore";
 import { auth, db, storage } from '../config/firebase';
 import { Alert } from 'react-native';
-import { IClient } from '../interfaces/IClient';
+import { IClient, IDesignation } from '../interfaces/IClient';
 
 
 interface AppContextData {
@@ -15,14 +15,17 @@ interface AppContextData {
     listUsers: IUser[];
     listClients: IClient[];
     listEquipments: IEquipment[];
+    listDesignation: IDesignation[];
     createUser: ({ email, password, name, photoUser, role }: ICreateUser) => Promise<void>;
     createClient: ({ email, name, phone }: IClient) => Promise<void>;
     createEquipment: ({ name }: IEquipment) => Promise<void>;
+    createDesignation: ({ userId, equipamentId }: IDesignation) => Promise<void>
     login: ({ email, password }: ILoginUser) => Promise<void>;
     logout: () => Promise<void>;
     deleteUser: (id: string) => Promise<boolean>;
     deleteClient: (id: string) => Promise<boolean>;
     deleteEquipment: (id: string) => Promise<boolean>;
+    deleteDesignation: (id: string) => Promise<boolean>;
 }
 
 const AppContext = createContext({} as AppContextData)
@@ -42,12 +45,16 @@ const keysFirebase = {
     equipments: {
         nameTable: 'equipments',
     },
+    designation: {
+        nameTable: 'designation',
+    },
 }
 
 function AppProvider({ children }: any) {
     const [userAuth, setUserAuth] = useState<IUser | null>(null);
     const [listUsers, setListUsers] = useState<IUser[]>([]);
     const [listClients, setListClients] = useState<IClient[]>([]);
+    const [listDesignation, setListDesignation] = useState<IDesignation[]>([])
     const [listEquipments, setListEquipments] = useState<IEquipment[]>([]);
 
     function uriToBlob(uri: string): Promise<Blob> {
@@ -163,6 +170,48 @@ function AppProvider({ children }: any) {
         }
     }, [])
 
+    const getListDesignation = useCallback(async () => {
+        const userRef = collection(db, keysFirebase.designation.nameTable)
+        onSnapshot(userRef, (querySnapshot) => {
+            const data = querySnapshot.docs.map(docs => {
+                console.log(docs.data())
+                return {
+                    id: docs.id,
+                    equipamentId: docs.data().equipamentId,
+                    userId: docs.data().userId,
+                }
+            }) as IDesignation[]
+            setListDesignation(data)
+        })
+    }, [])
+
+    const createDesignation = useCallback(async ({ userId, equipamentId }: IDesignation) => {
+
+        addDoc(collection(db, keysFirebase.designation.nameTable), {
+            userId,
+            equipamentId
+        }).then((docRef) => {
+            console.log('New Designation', docRef.id)
+            return docRef.id
+        })
+            .catch((error) => {
+                Alert.alert("Error adding document: ", error);
+            });
+
+
+    }, [])
+
+    const deleteDesignation = useCallback(async (id: string) => {
+        try {
+            await deleteDoc(doc(db, keysFirebase.designation.nameTable, id));
+            Alert.alert('Designação excluida com sucesso!')
+            return true
+        } catch (error: any) {
+            Alert.alert('Error', error)
+            return false
+        }
+    }, [])
+
     const getListClients = useCallback(async () => {
         const userRef = collection(db, keysFirebase.clients.nameTable)
         onSnapshot(userRef, (querySnapshot) => {
@@ -268,6 +317,7 @@ function AppProvider({ children }: any) {
                             getListUsers();
                             getListClients();
                             getListEquipments();
+                            getListDesignation();
                         }
                         await storeData({
                             email,
@@ -302,7 +352,24 @@ function AppProvider({ children }: any) {
     }, [])
 
     return (
-        <AppContext.Provider value={{ userAuth, signed: !!userAuth?.uuidLogin, createUser, login, logout, listUsers, deleteUser, createClient, listClients, deleteClient, listEquipments, createEquipment, deleteEquipment }}>
+        <AppContext.Provider value={{
+            userAuth,
+            signed: !!userAuth?.uuidLogin,
+            createUser,
+            login,
+            logout,
+            listUsers,
+            deleteUser,
+            createClient,
+            listClients,
+            deleteClient,
+            listEquipments,
+            createEquipment,
+            deleteEquipment,
+            listDesignation,
+            createDesignation,
+            deleteDesignation
+        }}>
             {children}
         </AppContext.Provider>
     )
