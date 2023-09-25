@@ -235,13 +235,15 @@ function AppProvider({ children }: any) {
         })
     }, [])
 
-    const createOrder = useCallback(async ({ order, many, clientId, filename }: IOrder) => {
+    const createOrder = useCallback(async ({ order, many, clientId, filename, config, equipamentId }: IOrder) => {
 
         addDoc(collection(db, keysFirebase.orders.nameTable), {
             order,
             many,
             clientId,
-            filename
+            filename,
+            config,
+            equipamentId
         }).then((docRef) => {
             console.log('New order', docRef.id)
             return docRef.id
@@ -365,13 +367,13 @@ function AppProvider({ children }: any) {
                             role: doc.data().role,
                             uuidLogin: doc.data().uuidLogin,
                         })
-                        if (doc.data().role == 'coordinator') {
-                            getListUsers();
-                            getListClients();
-                            getListOrders();
-                            getListEquipments();
-                            getListDesignation();
-                        }
+
+                        getListUsers();
+                        getListClients();
+                        getListOrders();
+                        getListEquipments();
+                        getListDesignation();
+
                         await storeData({
                             email,
                             password

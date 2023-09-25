@@ -31,7 +31,35 @@ export function ManageOrders() {
         clientId: '',
         many: 0,
         order: '',
-        filename: ''
+        filename: '',
+        equipamentId: '',
+        config: {
+            altura_de_felpa: 0,
+            comprimento_tear_acabado: 0,
+            comprimento_tear_cru: 0,
+            densidades: {
+                1: 0,
+                2: 0,
+                3: 0,
+            },
+            largura_tear_acabado: 0,
+            largura_tear_cru: 0,
+            peso_acabado: 0,
+            peso_tear: 0,
+            tramas_seletores: {
+                cru: 0,
+                poliester: {
+                    1: 0,
+                    2: 0,
+                    3: 0,
+                },
+            },
+            urdumes: {
+                base: 0,
+                felpa: 0
+            },
+            obs: ''
+        }
     });
     const [load, setLoad] = useState<boolean>(false);
     const [type, setType] = useState()
@@ -263,7 +291,9 @@ export function ManageOrders() {
                             <TouchableOpacity onPress={() => setModalCreate(false)}>
                                 <Icon name="close" size={20} />
                             </TouchableOpacity>
-                            <ScrollView>
+                            <ScrollView
+                                showsVerticalScrollIndicator={false}
+                            >
                                 <Text style={{ alignSelf: 'center', fontSize: 18, fontWeight: 'bold' }}>Novo Pedido</Text>
                                 <TouchableOpacity onPress={() => handleListSelect(listKeyValueClients, 'client')} style={[styles.select, styles.shadow]}>
                                     {
@@ -290,36 +320,36 @@ export function ManageOrders() {
                                 <Text>Configuração</Text>
                             </TouchableOpacity> */}
 
-                                <Input title="Comprimento Tear CRU" onChangeText={(value) => setNewOrder({ ...newOrder, filename: value })} />
-                                <Input title="Comprimento Tear Acabado" onChangeText={(value) => setNewOrder({ ...newOrder, filename: value })} />
+                                <Input title="Comprimento Tear CRU" onChangeText={(value) => setNewOrder({ ...newOrder, config: { ...newOrder.config, comprimento_tear_cru: parseInt(value, 10) } })} />
+                                <Input title="Comprimento Tear Acabado" onChangeText={(value) => setNewOrder({ ...newOrder, config: { ...newOrder.config, comprimento_tear_acabado: parseInt(value, 10) } })} />
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                    <Input title="Largura Tear CRU" onChangeText={(value) => setNewOrder({ ...newOrder, filename: value })} width='45%' />
-                                    <Input title="Largura Tear Acabado" onChangeText={(value) => setNewOrder({ ...newOrder, filename: value })} width='45%' />
+                                    <Input title="Largura Tear CRU" onChangeText={(value) => setNewOrder({ ...newOrder, config: { ...newOrder.config, largura_tear_cru: parseInt(value, 10) } })} width='45%' />
+                                    <Input title="Largura Tear Acabado" onChangeText={(value) => setNewOrder({ ...newOrder, config: { ...newOrder.config, largura_tear_acabado: parseInt(value, 10) } })} width='45%' />
                                 </View>
 
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                    <Input title="Peso Tear" onChangeText={(value) => setNewOrder({ ...newOrder, filename: value })} width='45%' />
-                                    <Input title="Peso Acabado" onChangeText={(value) => setNewOrder({ ...newOrder, filename: value })} width='45%' />
+                                    <Input title="Peso Tear" onChangeText={(value) => setNewOrder({ ...newOrder, config: { ...newOrder.config, peso_tear: parseInt(value, 10) } })} width='45%' />
+                                    <Input title="Peso Acabado" onChangeText={(value) => setNewOrder({ ...newOrder, config: { ...newOrder.config, peso_acabado: parseInt(value, 10) } })} width='45%' />
                                 </View>
 
                                 <Input title="Altura Felpa" onChangeText={(value) => setNewOrder({ ...newOrder, filename: value })} />
                                 <Text style={styles.title}>Densidades</Text>
-                                <Input title="1" onChangeText={(value) => setNewOrder({ ...newOrder, filename: value })} />
-                                <Input title="2" onChangeText={(value) => setNewOrder({ ...newOrder, filename: value })} />
-                                <Input title="3" onChangeText={(value) => setNewOrder({ ...newOrder, filename: value })} />
+                                <Input title="1" onChangeText={(value) => setNewOrder({ ...newOrder, config: { ...newOrder.config, densidades: { ...newOrder.config?.densidades, 1: parseInt(value, 10) } } })} />
+                                <Input title="2" onChangeText={(value) => setNewOrder({ ...newOrder, config: { ...newOrder.config, densidades: { ...newOrder.config?.densidades, 2: parseInt(value, 10) } } })} />
+                                <Input title="3" onChangeText={(value) => setNewOrder({ ...newOrder, config: { ...newOrder.config, densidades: { ...newOrder.config?.densidades, 3: parseInt(value, 10) } } })} />
                                 <Text style={styles.title}>Tramas Seletores</Text>
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                    <Input title="CRU" onChangeText={(value) => setNewOrder({ ...newOrder, filename: value })} width="45%" />
+                                    <Input title="CRU" onChangeText={(value) => setNewOrder({ ...newOrder, config: { tramas_seletores: { cru: parseInt(value, 10) } } })} width="45%" />
                                     <View style={{ width: "45%" }}>
-                                        <Input title="Poliester 1" onChangeText={(value) => setNewOrder({ ...newOrder, filename: value })} />
-                                        <Input title="Poliester 2" onChangeText={(value) => setNewOrder({ ...newOrder, filename: value })} />
-                                        <Input title="Poliester 3" onChangeText={(value) => setNewOrder({ ...newOrder, filename: value })} />
+                                        <Input title="Poliester 1" onChangeText={(value) => setNewOrder({ ...newOrder, config: { ...newOrder.config, tramas_seletores: { ...newOrder.config?.tramas_seletores, poliester: { ...newOrder.config?.tramas_seletores?.poliester, 1: parseInt(value, 10) } } } })} />
+                                        <Input title="Poliester 2" onChangeText={(value) => setNewOrder({ ...newOrder, config: { ...newOrder.config, tramas_seletores: { ...newOrder.config?.tramas_seletores, poliester: { ...newOrder.config?.tramas_seletores?.poliester, 2: parseInt(value, 10) } } } })} />
+                                        <Input title="Poliester 3" onChangeText={(value) => setNewOrder({ ...newOrder, config: { ...newOrder.config, tramas_seletores: { ...newOrder.config?.tramas_seletores, poliester: { ...newOrder.config?.tramas_seletores?.poliester, 3: parseInt(value, 10) } } } })} />
                                     </View>
                                 </View>
-                                <Text>Urdumes</Text>
-                                <Input title="Base" onChangeText={(value) => setNewOrder({ ...newOrder, filename: value })} />
-                                <Input title="Felpa" onChangeText={(value) => setNewOrder({ ...newOrder, filename: value })} />
-                                <Input title="Obs.:" onChangeText={(value) => setNewOrder({ ...newOrder, filename: value })} />
+                                <Text style={styles.title}>Urdumes</Text>
+                                <Input title="Base" onChangeText={(value) => setNewOrder({ ...newOrder, config: { ...newOrder.config, urdumes: { ...newOrder.config?.urdumes, base: parseInt(value, 10) } } })} />
+                                <Input title="Felpa" onChangeText={(value) => setNewOrder({ ...newOrder, config: { ...newOrder.config, urdumes: { ...newOrder.config?.urdumes, felpa: parseInt(value, 10) } } })} />
+                                <Input title="Obs.:" onChangeText={(value) => setNewOrder({ ...newOrder, config: { ...newOrder.config, obs: value } })} />
                                 <TouchableOpacity onPress={handleSend} style={[styles.button, { backgroundColor: '#84ff68' }]} disabled={load}>
                                     <Text style={styles.buttonTitle}>Enviar</Text>
                                 </TouchableOpacity>

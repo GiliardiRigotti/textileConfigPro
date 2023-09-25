@@ -7,7 +7,11 @@ interface IConfig {
     peso_tear?: number;
     peso_acabado?: number;
     altura_de_felpa?: number;
-    densidades?: number[];
+    densidades?: {
+        1?: number;
+        2?: number;
+        3?: number;
+    };
     tramas_seletores?: ITramaSeletores;
     urdumes?: IUrdumes;
     obs?: string;
@@ -16,7 +20,11 @@ interface IConfig {
 
 interface ITramaSeletores {
     cru?: string | number;
-    poliester?: string[] | number[];
+    poliester?: {
+        1?: number;
+        2?: number;
+        3?: number;
+    };
 }
 
 interface IUrdumes {
