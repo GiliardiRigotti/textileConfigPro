@@ -362,6 +362,7 @@ function AppProvider({ children }: any) {
                     querySnapshot.forEach(async (doc) => {
                         console.log(doc.id, " => ", doc.data());
                         setUserAuth({
+                            id: doc.id,
                             name: doc.data().name,
                             photoUser: doc.data().photoUser,
                             role: doc.data().role,

@@ -77,15 +77,17 @@ export function MyEquipment() {
             if (item.userId == userAuth?.id) {
                 const equipment = listEquipments.filter((itemEquipament) => itemEquipament.id == item.equipamentId)
                 const order = listOrders.filter((itemOrders) => itemOrders.equipamentId == item.equipamentId)
+                console.log('Equipamento', {
+                    id: item.id,
+                    order: order[0],
+                    equipment: equipment[0]
+                })
                 listFiltered.push({
                     id: item.id,
                     order: order[0],
                     equipment: equipment[0]
                 })
-                console.log('Designação: ', item)
-                console.log({
-                    equipment: equipment[0].id
-                })
+
             }
         })
         return listFiltered
@@ -128,9 +130,6 @@ export function MyEquipment() {
                         <View style={styles.column}>
                             <Text style={styles.rowTitle}>Equipamento</Text>
                         </View>
-                        <View style={styles.column}>
-                            <Text style={styles.rowTitle}>Funcionário</Text>
-                        </View>
 
                     </View>
                     {
@@ -142,11 +141,9 @@ export function MyEquipment() {
                                             <Text style={styles.rowText}>{index + 1}</Text>
                                         </View>
                                         <View style={styles.column}>
-                                            <Text style={styles.rowText}>{item.equipment}</Text>
+                                            <Text style={styles.rowText}>{item.equipment.name}</Text>
                                         </View>
-                                        <View style={styles.column}>
-                                            <Text style={styles.rowText}>{item.user}</Text>
-                                        </View>
+
                                     </View>
                                 )
                             })
