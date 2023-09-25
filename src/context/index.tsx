@@ -6,7 +6,7 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "fire
 import { collection, addDoc, query, getDocs, where, onSnapshot, deleteDoc, doc } from "firebase/firestore";
 import { auth, db, storage } from '../config/firebase';
 import { Alert } from 'react-native';
-import { IClient, IDesignation } from '../interfaces/IClient';
+import { IClient, IDesignation, IOrder } from '../interfaces/IClient';
 
 
 interface AppContextData {
@@ -14,16 +14,19 @@ interface AppContextData {
     signed: boolean;
     listUsers: IUser[];
     listClients: IClient[];
+    listOrders: IOrder[];
     listEquipments: IEquipment[];
     listDesignation: IDesignation[];
     createUser: ({ email, password, name, photoUser, role }: ICreateUser) => Promise<void>;
     createClient: ({ email, name, phone }: IClient) => Promise<void>;
+    createOrder: ({ order, many, clientId, filename }: IOrder) => Promise<void>;
     createEquipment: ({ name }: IEquipment) => Promise<void>;
-    createDesignation: ({ userId, equipamentId }: IDesignation) => Promise<void>
+    createDesignation: ({ userId, equipamentId }: IDesignation) => Promise<void>;
     login: ({ email, password }: ILoginUser) => Promise<void>;
     logout: () => Promise<void>;
     deleteUser: (id: string) => Promise<boolean>;
     deleteClient: (id: string) => Promise<boolean>;
+    deleteOrder: (id: string) => Promise<boolean>;
     deleteEquipment: (id: string) => Promise<boolean>;
     deleteDesignation: (id: string) => Promise<boolean>;
 }
@@ -48,12 +51,16 @@ const keysFirebase = {
     designation: {
         nameTable: 'designation',
     },
+    orders: {
+        nameTable: 'orders',
+    }
 }
 
 function AppProvider({ children }: any) {
     const [userAuth, setUserAuth] = useState<IUser | null>(null);
     const [listUsers, setListUsers] = useState<IUser[]>([]);
     const [listClients, setListClients] = useState<IClient[]>([]);
+    const [listOrders, setListOrders] = useState<IOrder[]>([]);
     const [listDesignation, setListDesignation] = useState<IDesignation[]>([])
     const [listEquipments, setListEquipments] = useState<IEquipment[]>([]);
 
@@ -212,6 +219,51 @@ function AppProvider({ children }: any) {
         }
     }, [])
 
+    const getListOrders = useCallback(async () => {
+        const orderRef = collection(db, keysFirebase.orders.nameTable)
+        onSnapshot(orderRef, (querySnapshot) => {
+            const data = querySnapshot.docs.map(docs => {
+                return {
+                    id: docs.id,
+                    order: docs.data().order,
+                    many: docs.data().many,
+                    clientId: docs.data().clientId,
+                    filename: docs.data().filename,
+                }
+            }) as IOrder[]
+            setListOrders(data)
+        })
+    }, [])
+
+    const createOrder = useCallback(async ({ order, many, clientId, filename }: IOrder) => {
+
+        addDoc(collection(db, keysFirebase.orders.nameTable), {
+            order,
+            many,
+            clientId,
+            filename
+        }).then((docRef) => {
+            console.log('New order', docRef.id)
+            return docRef.id
+        })
+            .catch((error) => {
+                Alert.alert("Error adding document: ", error);
+            });
+
+
+    }, [])
+
+    const deleteOrder = useCallback(async (id: string) => {
+        try {
+            await deleteDoc(doc(db, keysFirebase.orders.nameTable, id));
+            Alert.alert('Designação excluida com sucesso!')
+            return true
+        } catch (error: any) {
+            Alert.alert('Error', error)
+            return false
+        }
+    }, [])
+
     const getListClients = useCallback(async () => {
         const userRef = collection(db, keysFirebase.clients.nameTable)
         onSnapshot(userRef, (querySnapshot) => {
@@ -316,6 +368,7 @@ function AppProvider({ children }: any) {
                         if (doc.data().role == 'coordinator') {
                             getListUsers();
                             getListClients();
+                            getListOrders();
                             getListEquipments();
                             getListDesignation();
                         }
@@ -368,7 +421,10 @@ function AppProvider({ children }: any) {
             deleteEquipment,
             listDesignation,
             createDesignation,
-            deleteDesignation
+            deleteDesignation,
+            listOrders,
+            createOrder,
+            deleteOrder
         }}>
             {children}
         </AppContext.Provider>

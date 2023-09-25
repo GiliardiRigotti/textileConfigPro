@@ -9,7 +9,6 @@ export function DesignateEmployee() {
     const { listEquipments, listUsers, listDesignation, deleteDesignation, createDesignation } = useContext(AppContext)
     const [modalCreate, setModalCreate] = useState<boolean>(false)
     const [modalSelect, setModalSelect] = useState<boolean>(false)
-    const [newUser, setNewUser] = useState<IClient>()
     const [load, setLoad] = useState<boolean>(false)
     const [listSelect, setListSelect] = useState<IKeyName[]>([])
     const [keyName, setKeyName] = useState<{ user: { key?: string, name: string }, equipment: { key?: string, name: string } }>()
@@ -44,7 +43,8 @@ export function DesignateEmployee() {
     }
 
     function handleListSelect(list: IKeyName[], type: 'user' | 'equipment') {
-        setListSelect(list, type)
+        setType(type)
+        setListSelect(list)
         setModalSelect(true)
     }
 
@@ -55,10 +55,13 @@ export function DesignateEmployee() {
     async function handleSend() {
         setLoad(true)
         try {
-            if (!newUser) {
-                throw new Error('Esta vazio a edição')
+            if (!keyName?.user.key || !keyName.equipment.key) {
+                throw new Error('Esta vazio os campos')
             }
-            //await createClient(newUser)
+            await createDesignation({
+                userId: keyName.user.key,
+                equipamentId: keyName.equipment.key
+            })
             Alert.alert('Designado com sucesso!')
             setModalCreate(false)
         } catch (error: any) {
@@ -69,7 +72,7 @@ export function DesignateEmployee() {
     }
 
     const list = useMemo(() => {
-        const listFiltered: [{ id?: string, user: string, equipment: string }] = []
+        const listFiltered: { id?: string, user: string, equipment: string }[] = []
         listDesignation.forEach((item) => {
             const user = listUsers.filter((itemUser) => itemUser.uuidLogin == item.userId)
             const equipment = listEquipments.filter((itemEquipament) => itemEquipament.id == item.equipamentId)

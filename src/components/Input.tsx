@@ -2,11 +2,14 @@ import { View, Text, TextInputProps, TextInput, StyleSheet } from "react-native"
 
 interface Props extends TextInputProps {
     title: string;
+    width?: string;
 }
 
-export function Input({ title, ...rest }: Props) {
+export function Input({ title, width, ...rest }: Props) {
     return (
-        <View style={styles.container}>
+        <View
+            style={[styles.container, { width: width }]}
+        >
             <Text style={styles.title}>{title}</Text>
             <TextInput style={styles.input} value={rest.value} onChangeText={rest.onChangeText} />
         </View>

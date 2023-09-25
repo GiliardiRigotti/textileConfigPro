@@ -22,6 +22,10 @@ export function Home() {
         navigation.navigate("DesignateEmployee");
     }
 
+    function handleNavigationManageOrders() {
+        navigation.navigate("ManageOrders");
+    }
+
     return (
         <>
             <Header />
@@ -30,7 +34,7 @@ export function Home() {
                 <Card icon={require("../../assets/costura.png")} title="Gerir Maquinários" color="#de7c7c" styled={true} onPress={handleNavigationManageEquipments} />
                 <Card icon="account-group" title="Gerir Clientes" color="#b3f495" styled={false} onPress={handleNavigationManageClients} />
                 <Card icon="account-hard-hat" title="Designar Funcionario" color="#ffe49f" styled={false} onPress={handleNavigationDesignateEmployee} />
-                <Card icon="package-variant" title="Gerir Pedidos" color="#a3e4e0" styled={false} onPress={handleNavigationManageClients} />
+                <Card icon="package-variant" title="Gerir Pedidos" color="#a3e4e0" styled={false} onPress={handleNavigationManageOrders} />
             </ScrollView>
         </>
 

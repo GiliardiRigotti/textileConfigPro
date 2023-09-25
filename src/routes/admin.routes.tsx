@@ -5,6 +5,7 @@ import { ManageEmployees } from '../screens/admin/ManageEmployees';
 import { ManageClients } from '../screens/admin/ManageClients';
 import { ManageEquipments } from '../screens/admin/ManageEquipments';
 import { DesignateEmployee } from '../screens/admin/DesignateEmployee';
+import { ManageOrders } from '../screens/admin/ManageOrders';
 const Stack = createStackNavigator();
 
 export default function AdminRoutes() {
@@ -18,6 +19,7 @@ export default function AdminRoutes() {
             <Stack.Screen name="ManageClients" component={ManageClients} />
             <Stack.Screen name="ManageEquipments" component={ManageEquipments} />
             <Stack.Screen name="DesignateEmployee" component={DesignateEmployee} />
+            <Stack.Screen name="ManageOrders" component={ManageOrders} />
         </Stack.Navigator>
     );
 }

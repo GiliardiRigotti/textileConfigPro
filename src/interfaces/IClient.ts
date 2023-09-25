@@ -11,4 +11,14 @@ interface IDesignation {
     userId: string;
 }
 
-export { IClient, IDesignation }
+interface IOrder {
+    id?: string;
+    order: string;
+    many: number;
+    clientId: string;
+    filename: string;
+    config?: IConfig;
+    equipamentId?: string;
+}
+
+export { IClient, IDesignation, IOrder }
