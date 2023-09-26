@@ -32,6 +32,14 @@
         "projectId": "ed3818d9-4ca6-444d-85f0-90b8c905bb5a"
       }
     },
-    "owner": "giliardi"
+    "owner": "giliardi",
+    "plugins": [
+      [
+        "expo-barcode-scanner",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access camera."
+        }
+      ]
+    ]
   }
 }

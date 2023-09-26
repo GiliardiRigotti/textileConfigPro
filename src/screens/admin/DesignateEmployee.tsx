@@ -74,8 +74,9 @@ export function DesignateEmployee() {
     const list = useMemo(() => {
         const listFiltered: { id?: string, user: string, equipment: string }[] = []
         listDesignation.forEach((item) => {
-            const user = listUsers.filter((itemUser) => itemUser.uuidLogin == item.userId)
+            const user = listUsers.filter((itemUser) => itemUser.id == item.userId)
             const equipment = listEquipments.filter((itemEquipament) => itemEquipament.id == item.equipamentId)
+            console.log(equipment[0], user[0])
             listFiltered.push({
                 id: item.id,
                 user: user[0].name,

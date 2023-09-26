@@ -46,7 +46,7 @@ export function ManageClients() {
                 throw new Error('Esta vazio a edição')
             }
             await createClient(newUser)
-            Alert.alert('Criado usuario com sucesso!')
+            Alert.alert('Criado cliente com sucesso!')
             setModalCreate(false)
         } catch (error: any) {
             Alert.alert('Error:', error)

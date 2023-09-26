@@ -3,123 +3,49 @@ import Icon from '@expo/vector-icons/MaterialCommunityIcons'
 import { Header } from "../../components/Header"
 import { useContext, useMemo, useState } from "react"
 import { AppContext } from "../../context"
-import { IClient, IOrder } from "../../interfaces/IClient"
+import { IClient, IOrder, IOrderView } from "../../interfaces/IClient"
 
-export function MyEquipment() {
-    const { listEquipments, listOrders, listDesignation, userAuth } = useContext(AppContext)
-    const [modalCreate, setModalCreate] = useState<boolean>(false)
-    const [modalSelect, setModalSelect] = useState<boolean>(false)
-    const [load, setLoad] = useState<boolean>(false)
-    const [listSelect, setListSelect] = useState<IKeyName[]>([])
-    const [keyName, setKeyName] = useState<{ user: { key?: string, name: string }, equipment: { key?: string, name: string } }>()
-    const [type, setType] = useState()
+export function MyEquipment({ navigation }) {
+    const { listEquipments, listOrders, listDesignation, userAuth, listClients } = useContext(AppContext)
+    const [modal, setModal] = useState<boolean>(false)
+    const [order, setOrder] = useState<IOrderView>()
 
-
-    /*  function handleDelete(id: string) {
- 
-         Alert.alert(
-             'Aviso',
-             'Tem certeza que quer deletar?',
-             [
-                 {
-                     text: 'Não',
-                     onPress: () => { },
-                     style: 'cancel',
-                 },
-                 {
-                     text: 'Sim',
-                     onPress: async () => await deleteDesignation(id),
-                 },
-             ],
-             { cancelable: false },
-         );
-     }
- 
-     function handleSelect(type: 'user' | 'equipment', item: IKeyName) {
-         keyName[type] = {
-             key: item.key,
-             name: item.name
-         }
-     }
- 
-     function handleListSelect(list: IKeyName[], type: 'user' | 'equipment') {
-         setType(type)
-         setListSelect(list)
-         setModalSelect(true)
-     } */
-
-    function handleAddDesignation() {
-        setModalCreate(true);
+    function handleNavigationHome() {
+        navigation.navigate("Home")
     }
 
-    /*  async function handleSend() {
-         setLoad(true)
-         try {
-             if (!keyName?.user.key || !keyName.equipment.key) {
-                 throw new Error('Esta vazio os campos')
-             }
-             await createDesignation({
-                 userId: keyName.user.key,
-                 equipamentId: keyName.equipment.key
-             })
-             Alert.alert('Designado com sucesso!')
-             setModalCreate(false)
-         } catch (error: any) {
-             Alert.alert('Error:', error)
-         } finally {
-             setLoad(false)
-         }
-     } */
+    function handleViewOrder(item: IOrderView) {
+        setOrder(item);
+        setModal(true);
+    }
 
     const list = useMemo(() => {
-        const listFiltered: { id?: string, order: IOrder, equipment: IEquipment }[] = []
-        listDesignation.forEach((item) => {
-            if (item.userId == userAuth?.id) {
-                const equipment = listEquipments.filter((itemEquipament) => itemEquipament.id == item.equipamentId)
-                const order = listOrders.filter((itemOrders) => itemOrders.equipamentId == item.equipamentId)
-                console.log('Equipamento', {
-                    id: item.id,
-                    order: order[0],
-                    equipment: equipment[0]
-                })
-                listFiltered.push({
-                    id: item.id,
-                    order: order[0],
-                    equipment: equipment[0]
-                })
-
-            }
+        const listFiltered: IOrderView[] = []
+        listOrders.forEach((item) => {
+            const equipment = listEquipments.filter((itemEquipment) => itemEquipment.id == item.equipmentId)
+            const client = listClients.filter((itemClient) => itemClient.id == item.clientId)
+            const designation = listDesignation.filter((itemDesignation) => itemDesignation.equipmentId == item.equipmentId)
+            console.log('UserId ', item)
+            //if (designation.length > 0) {
+            listFiltered.push({
+                id: item.id,
+                order: item,
+                equipment: equipment[0],
+                client: client[0]
+            })
+            //}
         })
+
         return listFiltered
     }, [listEquipments, listOrders, listDesignation])
-
-    /*  const listKeyValueUsers = useMemo(() => {
-         const list: IKeyName[] = []
-         listUsers.forEach((item) => {
-             list.push({
-                 key: item.id,
-                 name: item.name
-             })
-         })
-         return list
-     }, [])
- 
-     const listKeyValueEquipments = useMemo(() => {
-         const list: IKeyName[] = []
-         listEquipments.forEach((item) => {
-             list.push({
-                 key: item.id,
-                 name: item.name
-             })
-         })
-         return list
-     }, []) */
 
     return (
         <>
             <Header />
             <View style={styles.container}>
-
+                <TouchableOpacity onPress={handleNavigationHome} style={[styles.button, { backgroundColor: '#e4a74c' }]}>
+                    <Text style={styles.buttonTitle}>Home</Text>
+                </TouchableOpacity>
                 <ScrollView
                     style={[styles.list, styles.shadow]}
                 >
@@ -128,23 +54,27 @@ export function MyEquipment() {
                             <Text style={styles.rowTitle}>ID</Text>
                         </View>
                         <View style={styles.column}>
+                            <Text style={styles.rowTitle}>Pedido</Text>
+                        </View>
+                        <View style={styles.column}>
                             <Text style={styles.rowTitle}>Equipamento</Text>
                         </View>
-
                     </View>
                     {
                         list.length > 0 ?
                             list.map((item, index) => {
                                 return (
-                                    <View key={index} style={styles.row}>
+                                    <TouchableOpacity key={index} style={styles.row} onPress={() => handleViewOrder(item)}>
                                         <View style={styles.columnId}>
                                             <Text style={styles.rowText}>{index + 1}</Text>
                                         </View>
                                         <View style={styles.column}>
+                                            <Text style={styles.rowText}>{item.order.order}</Text>
+                                        </View>
+                                        <View style={styles.column}>
                                             <Text style={styles.rowText}>{item.equipment.name}</Text>
                                         </View>
-
-                                    </View>
+                                    </TouchableOpacity>
                                 )
                             })
                             :
@@ -152,22 +82,50 @@ export function MyEquipment() {
                     }
                 </ScrollView >
                 <Modal
-                    visible={modalCreate}
+                    visible={modal}
                     transparent
                 >
                     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                        <View style={[styles.list, { height: '80%', width: '90%' }, styles.shadow]}>
-                            <TouchableOpacity onPress={() => setModalCreate(false)}>
+                        <View style={[styles.list, { width: '80%', padding: 20 }, styles.shadow]}>
+                            <TouchableOpacity onPress={() => setModal(false)}>
                                 <Icon name="close" size={20} />
                             </TouchableOpacity>
-                            <Text style={{ alignSelf: 'center', fontSize: 18, fontWeight: 'bold' }}>Cadastro de Cliente</Text>
-
+                            <Text style={{ alignSelf: 'center', fontSize: 18, fontWeight: 'bold' }}>Pedido</Text>
+                            <View style={styles.orderView}>
+                                <Text style={{ fontWeight: 'bold' }}>
+                                    Item:
+                                </Text>
+                                <Text>
+                                    {order?.order.order}
+                                </Text>
+                            </View>
+                            <View style={styles.orderView}>
+                                <Text style={{ fontWeight: 'bold' }}>
+                                    Quantidade:
+                                </Text>
+                                <Text>
+                                    {order?.order.many}
+                                </Text>
+                            </View>
+                            <View style={styles.orderView}>
+                                <Text style={{ fontWeight: 'bold' }}>
+                                    Cliente:
+                                </Text>
+                                <Text>
+                                    {order?.client.name}
+                                </Text>
+                            </View>
+                            <View style={styles.orderView}>
+                                <Text style={{ fontWeight: 'bold' }}>
+                                    Equipamento:
+                                </Text>
+                                <Text>
+                                    {order?.equipment.name}
+                                </Text>
+                            </View>
                         </View>
                     </View>
                 </Modal>
-                <TouchableOpacity onPress={handleAddDesignation} style={{ position: 'absolute', right: 40, bottom: 20, backgroundColor: '#d9d9d9', width: 60, height: 60, borderRadius: 40, alignItems: 'center', justifyContent: 'center' }}>
-                    <Text style={{ fontSize: 40, color: 'white' }}>+</Text>
-                </TouchableOpacity>
             </View >
         </>
 
@@ -222,7 +180,7 @@ const styles = StyleSheet.create({
     },
     button: {
         alignSelf: 'center',
-        width: '45%',
+        width: '80%',
         height: 50,
         borderRadius: 5,
         alignItems: 'center',
@@ -232,5 +190,13 @@ const styles = StyleSheet.create({
     buttonTitle: {
         color: '#fff',
         fontWeight: 'bold',
+        fontSize: 18
+    },
+    orderView: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: '100%',
+        marginTop: 10,
     }
 })

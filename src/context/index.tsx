@@ -90,7 +90,6 @@ function AppProvider({ children }: any) {
             const blob = await uriToBlob(imageUri)
             const result = await uploadBytes(storageRef, blob)
             const linkImage = await getDownloadURL(result.ref)
-            console.log('linkImage: ', linkImage)
             return linkImage
         } catch (error: any) {
             console.error(error)
@@ -130,7 +129,6 @@ function AppProvider({ children }: any) {
         const userRef = collection(db, keysFirebase.users.nameTable)
         onSnapshot(userRef, (querySnapshot) => {
             const data = querySnapshot.docs.map(docs => {
-                console.log(docs.data())
                 return {
                     id: docs.id,
                     name: docs.data().name,
@@ -146,11 +144,11 @@ function AppProvider({ children }: any) {
     const createUser = useCallback(async ({ email, password, name, photoUser, role }: ICreateUser) => {
         createUserWithEmailAndPassword(auth, email, password)
             .then(async (userCredential) => {
-                const uri = await storageUploadPhotoUser(userCredential.user.uid, photoUser)
+                //const uri = await storageUploadPhotoUser(userCredential.user.uid, photoUser)
                 addDoc(collection(db, keysFirebase.users.nameTable), {
                     name,
                     role,
-                    photoUse: uri,
+                    photoUse: '',
                     uuidLogin: userCredential.user.uid
                 }).then((docRef) => {
                     console.log('New User', docRef.id)
@@ -181,23 +179,18 @@ function AppProvider({ children }: any) {
         const userRef = collection(db, keysFirebase.designation.nameTable)
         onSnapshot(userRef, (querySnapshot) => {
             const data = querySnapshot.docs.map(docs => {
-                console.log(docs.data())
                 return {
                     id: docs.id,
-                    equipamentId: docs.data().equipamentId,
-                    userId: docs.data().userId,
+                    ...docs.data()
                 }
             }) as IDesignation[]
             setListDesignation(data)
         })
     }, [])
 
-    const createDesignation = useCallback(async ({ userId, equipamentId }: IDesignation) => {
+    const createDesignation = useCallback(async (newDesignation: IDesignation) => {
 
-        addDoc(collection(db, keysFirebase.designation.nameTable), {
-            userId,
-            equipamentId
-        }).then((docRef) => {
+        addDoc(collection(db, keysFirebase.designation.nameTable), newDesignation).then((docRef) => {
             console.log('New Designation', docRef.id)
             return docRef.id
         })
@@ -225,29 +218,20 @@ function AppProvider({ children }: any) {
             const data = querySnapshot.docs.map(docs => {
                 return {
                     id: docs.id,
-                    order: docs.data().order,
-                    many: docs.data().many,
-                    clientId: docs.data().clientId,
-                    filename: docs.data().filename,
+                    ...docs.data()
                 }
             }) as IOrder[]
             setListOrders(data)
         })
     }, [])
 
-    const createOrder = useCallback(async ({ order, many, clientId, filename, config, equipamentId }: IOrder) => {
+    const createOrder = useCallback(async (newOrder: IOrder) => {
 
-        addDoc(collection(db, keysFirebase.orders.nameTable), {
-            order,
-            many,
-            clientId,
-            filename,
-            config,
-            equipamentId
-        }).then((docRef) => {
-            console.log('New order', docRef.id)
-            return docRef.id
-        })
+        addDoc(collection(db, keysFirebase.orders.nameTable), newOrder)
+            .then((docRef) => {
+                console.log('New order', docRef.id)
+                return docRef.id
+            })
             .catch((error) => {
                 Alert.alert("Error adding document: ", error);
             });
@@ -270,7 +254,6 @@ function AppProvider({ children }: any) {
         const userRef = collection(db, keysFirebase.clients.nameTable)
         onSnapshot(userRef, (querySnapshot) => {
             const data = querySnapshot.docs.map(docs => {
-                console.log(docs.data())
                 return {
                     id: docs.id,
                     name: docs.data().name,
@@ -314,7 +297,6 @@ function AppProvider({ children }: any) {
         const userRef = collection(db, keysFirebase.equipments.nameTable)
         onSnapshot(userRef, (querySnapshot) => {
             const data = querySnapshot.docs.map(docs => {
-                console.log(docs.data())
                 return {
                     id: docs.id,
                     name: docs.data().name,
@@ -355,12 +337,10 @@ function AppProvider({ children }: any) {
         signInWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
                 const user = userCredential.user;
-                console.log('User Credential: ', userCredential.user);
                 const q = query(collection(db, keysFirebase.users.nameTable), where(keysFirebase.users.uuidLogin, "==", user.uid));
 
                 getDocs(q).then((querySnapshot) => {
                     querySnapshot.forEach(async (doc) => {
-                        console.log(doc.id, " => ", doc.data());
                         setUserAuth({
                             id: doc.id,
                             name: doc.data().name,

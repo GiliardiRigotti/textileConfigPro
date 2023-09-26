@@ -7,7 +7,7 @@ interface IClient {
 
 interface IDesignation {
     id?: string;
-    equipamentId: string;
+    equipmentId: string;
     userId: string;
 }
 
@@ -18,7 +18,14 @@ interface IOrder {
     clientId: string;
     filename: string;
     config?: IConfig;
-    equipamentId?: string;
+    equipmentId?: string;
 }
 
-export { IClient, IDesignation, IOrder }
+interface IOrderView {
+    id?: string,
+    order: IOrder,
+    equipment: IEquipment,
+    client: IClient
+}
+
+export { IClient, IDesignation, IOrder, IOrderView }

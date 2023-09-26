@@ -123,7 +123,7 @@ export function ManageEmployees() {
                             },]}
                                 onSelected={(value) => setNewUser({ ...newUser, role: value })}
                             />
-                            <AttachImage onGetImage={(value) => setNewUser({ ...newUser, photoUser: value })} />
+                            {/* <AttachImage onGetImage={(value) => setNewUser({ ...newUser, photoUser: value })} /> */}
                             <TouchableOpacity onPress={handleSend} style={[styles.button, { backgroundColor: '#84ff68' }]} disabled={load}>
                                 <Text style={styles.buttonTitle}>Enviar</Text>
                             </TouchableOpacity>

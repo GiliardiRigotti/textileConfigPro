@@ -7,15 +7,15 @@ export function Home({ navigation }) {
         navigation.navigate("MyEquipment");
     }
 
-    function handleNavigationManageOrders() {
-        navigation.navigate("ManageOrders");
+    function handleNavigationQrcodeView() {
+        navigation.navigate("QrcodeView");
     }
     return (
         <>
             <Header />
             <View style={styles.container}>
                 <Card icon={require("../../assets/costura.png")} title="Gerir pedidos" color="#de7c7c" styled={true} onPress={handleNavigationMyEquipment} />
-                <Card icon="qrcode-scan" title="Ler QR-code" color="#fce8b4" styled={false} />
+                <Card icon="qrcode-scan" title="Ler QR-code" color="#fce8b4" styled={false} onPress={handleNavigationQrcodeView} />
             </View>
         </>
 

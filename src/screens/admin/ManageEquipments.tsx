@@ -42,7 +42,7 @@ export function ManageEquipments() {
                 throw new Error('Esta vazio a edição')
             }
             await createEquipment(newUser)
-            Alert.alert('Criado usuario com sucesso!')
+            Alert.alert('Criado equipamento com sucesso!')
             setModalCreate(false)
         } catch (error: any) {
             Alert.alert('Error:', error)
