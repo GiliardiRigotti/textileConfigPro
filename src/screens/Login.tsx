@@ -2,14 +2,14 @@ import Icon from '@expo/vector-icons/MaterialCommunityIcons'
 import { StyleSheet, TextInput, TouchableOpacity, View, Text, Alert } from "react-native";
 import { Logo } from "../components/Logo";
 import { useContext, useState } from 'react';
-import { ILoginUser } from '../interfaces/IUser';
+import { Load } from '../components/Load';
 import { AppContext } from '../context';
 
 export function Login() {
     const [hidePassword, setHidePassword] = useState<boolean>(true)
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-    const { login } = useContext(AppContext)
+    const { login, load } = useContext(AppContext)
 
     async function handleLogin() {
         if (email == '' || password == '') {
@@ -17,7 +17,9 @@ export function Login() {
             return
         }
         await login({ email, password });
-
+    }
+    if (load) {
+        return <Load />
     }
     return (
         <View style={styles.container}>

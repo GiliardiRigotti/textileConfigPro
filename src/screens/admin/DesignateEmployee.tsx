@@ -1,7 +1,7 @@
 import { Alert, FlatList, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import Icon from '@expo/vector-icons/MaterialCommunityIcons'
 import { Header } from "../../components/Header"
-import { useContext, useMemo, useState } from "react"
+import { useContext, useEffect, useMemo, useState } from "react"
 import { AppContext } from "../../context"
 import { IClient } from "../../interfaces/IClient"
 
@@ -11,7 +11,16 @@ export function DesignateEmployee() {
     const [modalSelect, setModalSelect] = useState<boolean>(false)
     const [load, setLoad] = useState<boolean>(false)
     const [listSelect, setListSelect] = useState<IKeyName[]>([])
-    const [keyName, setKeyName] = useState<{ user: { key?: string, name: string }, equipment: { key?: string, name: string } }>()
+    const [keyName, setKeyName] = useState<{ user: { key?: string, name: string }, equipment: { key?: string, name: string } }>({
+        user: {
+            key: '',
+            name: '',
+        },
+        equipment: {
+            key: '',
+            name: '',
+        }
+    })
     const [type, setType] = useState()
 
 
@@ -36,10 +45,18 @@ export function DesignateEmployee() {
     }
 
     function handleSelect(type: 'user' | 'equipment', item: IKeyName) {
-        keyName[type] = {
+        /* keyName[type] = {
             key: item.key,
             name: item.name
+        } */
+        console.log(item.key, item.name)
+        if (type == 'equipment') {
+            setKeyName({ ...keyName, equipment: { key: item.key, name: item.name } })
+        } else {
+            setKeyName({ ...keyName, user: { key: item.key, name: item.name } })
         }
+
+        setModalSelect(false)
     }
 
     function handleListSelect(list: IKeyName[], type: 'user' | 'equipment') {
@@ -60,9 +77,19 @@ export function DesignateEmployee() {
             }
             await createDesignation({
                 userId: keyName.user.key,
-                equipamentId: keyName.equipment.key
+                equipmentId: keyName.equipment.key
             })
             Alert.alert('Designado com sucesso!')
+            setKeyName({
+                user: {
+                    key: '',
+                    name: '',
+                },
+                equipment: {
+                    key: '',
+                    name: '',
+                }
+            })
             setModalCreate(false)
         } catch (error: any) {
             Alert.alert('Error:', error)
@@ -73,10 +100,13 @@ export function DesignateEmployee() {
 
     const list = useMemo(() => {
         const listFiltered: { id?: string, user: string, equipment: string }[] = []
+        console.log(listEquipments)
+        console.log(listDesignation)
         listDesignation.forEach((item) => {
             const user = listUsers.filter((itemUser) => itemUser.id == item.userId)
-            const equipment = listEquipments.filter((itemEquipament) => itemEquipament.id == item.equipamentId)
-            console.log(equipment[0], user[0])
+            const equipment = listEquipments.filter((itemEquipment) => itemEquipment.id == item.equipmentId)
+            //console.log(item)
+            console.log(equipment)
             listFiltered.push({
                 id: item.id,
                 user: user[0].name,
@@ -89,24 +119,28 @@ export function DesignateEmployee() {
     const listKeyValueUsers = useMemo(() => {
         const list: IKeyName[] = []
         listUsers.forEach((item) => {
+            console.log(item)
             list.push({
                 key: item.id,
                 name: item.name
             })
         })
         return list
-    }, [])
+    }, [listUsers])
 
     const listKeyValueEquipments = useMemo(() => {
         const list: IKeyName[] = []
         listEquipments.forEach((item) => {
+            console.log(item)
             list.push({
                 key: item.id,
                 name: item.name
             })
         })
         return list
-    }, [])
+    }, [listEquipments])
+
+    useEffect(() => { console.log(keyName) }, [keyName])
 
     return (
         <>
@@ -165,11 +199,27 @@ export function DesignateEmployee() {
                                 <Icon name="close" size={20} />
                             </TouchableOpacity>
                             <Text style={{ alignSelf: 'center', fontSize: 18, fontWeight: 'bold' }}>Cadastro de Cliente</Text>
-                            <TouchableOpacity onPress={() => handleListSelect(listKeyValueUsers, 'user')}>
-                                <Text>Selecionar Usuario</Text>
+                            <TouchableOpacity onPress={() => handleListSelect(listKeyValueUsers, 'user')}
+                                style={[styles.select, styles.shadow]}
+                            >
+                                {
+                                    keyName.user.name == '' ?
+                                        <Text>Selecionar Usuario</Text>
+                                        :
+                                        <Text>{keyName.user.name}</Text>
+                                }
+
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => handleListSelect(listKeyValueEquipments, 'equipment')}>
-                                <Text>Selecionar Equipamento</Text>
+                            <TouchableOpacity onPress={() => handleListSelect(listKeyValueEquipments, 'equipment')}
+                                style={[styles.select, styles.shadow]}
+                            >
+                                {
+                                    keyName.equipment.name == '' ?
+                                        <Text>Selecionar Equipamento</Text>
+                                        :
+                                        <Text>{keyName.equipment.name}</Text>
+                                }
+
                             </TouchableOpacity>
                             <TouchableOpacity onPress={handleSend} style={[styles.button, { backgroundColor: '#84ff68' }]} disabled={load}>
                                 <Text style={styles.buttonTitle}>Enviar</Text>
@@ -188,12 +238,20 @@ export function DesignateEmployee() {
                                 <FlatList
                                     data={listSelect}
                                     keyExtractor={(item) => item.name}
-                                    renderItem={(item) => (
-                                        <TouchableOpacity onPress={() => handleSelect(type, item)}>
-                                            <Text>{item.item.name}</Text>
-                                        </TouchableOpacity>
+                                    renderItem={({ item }) => {
+                                        console.log('Pessoas', item)
+                                        return (
+                                            <TouchableOpacity onPress={() => handleSelect(type, item)} style={{
+                                                width: '100%',
+                                                alignItems: 'center',
+                                                padding: 5,
+                                                borderBottomWidth: 1
+                                            }}>
+                                                <Text>{item.name}</Text>
+                                            </TouchableOpacity>
 
-                                    )}
+                                        )
+                                    }}
                                 />
                             </View>
                         </View>
@@ -266,5 +324,13 @@ const styles = StyleSheet.create({
     buttonTitle: {
         color: '#fff',
         fontWeight: 'bold',
-    }
+    },
+    select: {
+        borderRadius: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#fff',
+        height: 35,
+        marginTop: 15
+    },
 })

@@ -10,6 +10,7 @@ import { IClient, IDesignation, IOrder } from '../interfaces/IClient';
 
 
 interface AppContextData {
+    load: boolean
     userAuth: IUser | null;
     signed: boolean;
     listUsers: IUser[];
@@ -21,7 +22,7 @@ interface AppContextData {
     createClient: ({ email, name, phone }: IClient) => Promise<void>;
     createOrder: ({ order, many, clientId, filename }: IOrder) => Promise<void>;
     createEquipment: ({ name }: IEquipment) => Promise<void>;
-    createDesignation: ({ userId, equipamentId }: IDesignation) => Promise<void>;
+    createDesignation: ({ userId, equipmentId }: IDesignation) => Promise<void>;
     login: ({ email, password }: ILoginUser) => Promise<void>;
     logout: () => Promise<void>;
     deleteUser: (id: string) => Promise<boolean>;
@@ -57,6 +58,7 @@ const keysFirebase = {
 }
 
 function AppProvider({ children }: any) {
+    const [load, setLoad] = useState<boolean>(true)
     const [userAuth, setUserAuth] = useState<IUser | null>(null);
     const [listUsers, setListUsers] = useState<IUser[]>([]);
     const [listClients, setListClients] = useState<IClient[]>([]);
@@ -334,6 +336,7 @@ function AppProvider({ children }: any) {
     }, [])
 
     const login = useCallback(async ({ email, password }: ILoginUser) => {
+        setLoad(true)
         signInWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
                 const user = userCredential.user;
@@ -366,7 +369,9 @@ function AppProvider({ children }: any) {
             })
             .catch((error) => {
                 Alert.alert(`Error ${error.code}`, error.message);
-            });
+            }).finally(() => {
+                setLoad(false)
+            })
     }, []);
 
     const logout = async () => {
@@ -389,6 +394,7 @@ function AppProvider({ children }: any) {
 
     return (
         <AppContext.Provider value={{
+            load,
             userAuth,
             signed: !!userAuth?.uuidLogin,
             createUser,
